@@ -1,12 +1,13 @@
 Name: Ritchey&AI Array To PCM/WAV
 Implementation: 1
-Version: 1
-Long Identifier: Ritchey&AI Array To PCM/WAV i1 v1
-Short Identifier: R&AIATPWi1v1
+Version: 2
+Long Identifier: Ritchey&AI Array To PCM/WAV i1 v2
+Short Identifier: R&AIATPWi1v2
 Description: An EXPERIMENTAL user-defined PHP function for converting an array to numbers to a PCM/WAV audio file.
 History:
  - Project started July 12, 2024.
  - Version 1 completed July 12, 2024.
+ - Version 2 completed July 12, 2024.
 Author: James Daniel Marrs Ritchey
 Licensing: This project is hereby licensed under the Ritchey Permissive License v16.
 Notes:

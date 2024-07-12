@@ -1,27 +1,36 @@
 <?php
-function createWavFile($inputArray, $filePath, $sampleRate = 44100, $bitsPerSample = 16) {
+function createWavFile($leftChannelArray, $rightChannelArray, $filePath, $sampleRate = 44100, $bitsPerSample = 16) {
+    // Ensure both channels have the same number of samples by padding the shorter array
+    $maxLength = max(count($leftChannelArray), count($rightChannelArray));
+    $leftChannelArray = array_pad($leftChannelArray, $maxLength, 0);
+    $rightChannelArray = array_pad($rightChannelArray, $maxLength, 0);
+
     // WAV file header fields
     $audioFormat = 1; // PCM
     $numChannels = 2; // Stereo
-
-    // Calculate byte rate and block align based on user input
     $byteRate = $sampleRate * $numChannels * $bitsPerSample / 8;
     $blockAlign = $numChannels * $bitsPerSample / 8;
 
     // Prepare audio data
     $audioData = '';
-    foreach ($inputArray as $sample) {
-        // Adjust the sample based on the bit depth
-        $maxValue = pow(2, $bitsPerSample) / 2 - 1;
-        $sample = max(-$maxValue, min($maxValue, $sample));
-        // Pack the sample according to the specified bit depth
+    for ($i = 0; $i < $maxLength; $i++) {
+        $leftSample = isset($leftChannelArray[$i]) ? $leftChannelArray[$i] : 0;
+        $rightSample = isset($rightChannelArray[$i]) ? $rightChannelArray[$i] : 0;
+
+        // Adjust the samples based on the bit depth
+        $maxValue = pow(2, $bitsPerSample - 1) - 1;
+        $leftSample = max(-$maxValue, min($maxValue, $leftSample));
+        $rightSample = max(-$maxValue, min($maxValue, $rightSample));
+
+        // Pack the samples according to the specified bit depth
         if ($bitsPerSample == 16) {
-            $audioData .= pack('vv', $sample, $sample); // Stereo: duplicate the sample for both channels
+            $audioData .= pack('vv', $leftSample, $rightSample);
         } elseif ($bitsPerSample == 24) {
-            $packedSample = pack('V', $sample & 0xFFFFFF | ($sample < 0 ? 0xFF000000 : 0)); // 24-bit sample packed into 32 bits
-            $audioData .= substr($packedSample, 0, 3) . substr($packedSample, 0, 3); // Stereo: duplicate the sample for both channels
+            $packedLeftSample = pack('V', $leftSample & 0xFFFFFF | ($leftSample < 0 ? 0xFF000000 : 0));
+            $packedRightSample = pack('V', $rightSample & 0xFFFFFF | ($rightSample < 0 ? 0xFF000000 : 0));
+            $audioData .= substr($packedLeftSample, 0, 3) . substr($packedRightSample, 0, 3);
         } elseif ($bitsPerSample == 32) {
-            $audioData .= pack('VV', $sample, $sample); // Stereo: duplicate the sample for both channels
+            $audioData .= pack('VV', $leftSample, $rightSample);
         }
     }
 
